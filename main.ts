@@ -1,85 +1,50 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import {
+	App,
+	Editor,
+	MarkdownView,
+	Modal,
+	Notice,
+	Plugin,
+	PluginSettingTab,
+	Setting
+} from 'obsidian';
 
-// Remember to rename these classes and interfaces!
+// Import the new default export from 'openai' (v4+):
+import OpenAI from 'openai';
 
-interface MyPluginSettings {
+interface Pic2MarkdownSettings {
 	mySetting: string;
+	openaiApiKey: string;
 }
 
-const DEFAULT_SETTINGS: MyPluginSettings = {
-	mySetting: 'default'
-}
+const DEFAULT_SETTINGS: Pic2MarkdownSettings = {
+	mySetting: 'default',
+	openaiApiKey: ''
+};
 
-export default class MyPlugin extends Plugin {
-	settings: MyPluginSettings;
+export default class Pic2Markdown extends Plugin {
+	settings: Pic2MarkdownSettings;
 
 	async onload() {
+		console.log('loading Pic2Markdown plugin');
 		await this.loadSettings();
 
-		// This creates an icon in the left ribbon.
-		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
-			// Called when the user clicks the icon.
-			new Notice('This is a notice!');
-		});
-		// Perform additional things with the ribbon
+		// Create an icon in the left ribbon to open the modal
+		const ribbonIconEl = this.addRibbonIcon(
+			'dice', 
+			'Pic2Markdown Plugin', 
+			(evt: MouseEvent) => {
+				new Pic2MarkdownModal(this.app, this.settings).open();
+			}
+		);
 		ribbonIconEl.addClass('my-plugin-ribbon-class');
 
-		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
-		const statusBarItemEl = this.addStatusBarItem();
-		statusBarItemEl.setText('Status Bar Text');
-
-		// This adds a simple command that can be triggered anywhere
-		this.addCommand({
-			id: 'open-sample-modal-simple',
-			name: 'Open sample modal (simple)',
-			callback: () => {
-				new SampleModal(this.app).open();
-			}
-		});
-		// This adds an editor command that can perform some operation on the current editor instance
-		this.addCommand({
-			id: 'sample-editor-command',
-			name: 'Sample editor command',
-			editorCallback: (editor: Editor, view: MarkdownView) => {
-				console.log(editor.getSelection());
-				editor.replaceSelection('Sample Editor Command');
-			}
-		});
-		// This adds a complex command that can check whether the current state of the app allows execution of the command
-		this.addCommand({
-			id: 'open-sample-modal-complex',
-			name: 'Open sample modal (complex)',
-			checkCallback: (checking: boolean) => {
-				// Conditions to check
-				const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (markdownView) {
-					// If checking is true, we're simply "checking" if the command can be run.
-					// If checking is false, then we want to actually perform the operation.
-					if (!checking) {
-						new SampleModal(this.app).open();
-					}
-
-					// This command will only show up in Command Palette when the check function returns true
-					return true;
-				}
-			}
-		});
-
-		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new SampleSettingTab(this.app, this));
-
-		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
-		// Using this function will automatically remove the event listener when this plugin is disabled.
-		this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-			console.log('click', evt);
-		});
-
-		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
-		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
+		// Add the plugin settings tab
+		this.addSettingTab(new Pic2MarkdownSettingTab(this.app, this));
 	}
 
 	onunload() {
-
+		console.log('unloading Pic2Markdown plugin');
 	}
 
 	async loadSettings() {
@@ -91,40 +56,193 @@ export default class MyPlugin extends Plugin {
 	}
 }
 
-class SampleModal extends Modal {
-	constructor(app: App) {
+class Pic2MarkdownModal extends Modal {
+	settings: Pic2MarkdownSettings;
+
+	constructor(app: App, settings: Pic2MarkdownSettings) {
 		super(app);
+		this.settings = settings;
 	}
 
 	onOpen() {
-		const {contentEl} = this;
-		contentEl.setText('Woah!');
+		const { contentEl } = this;
+		contentEl.createEl('h2', { text: 'Upload an Image for GPT-4 with Vision' });
+
+		// 1) A text field for the user to enter the new file name
+		contentEl.createEl('label', { text: 'Name of the new file:' });
+		const fileNameInput = contentEl.createEl('input', { type: 'text' });
+		fileNameInput.value = 'Untitled'; // Provide a default
+
+		contentEl.createEl('br');
+
+		// 2) A file input to let the user pick an image
+		contentEl.createEl('label', { text: 'Select an image:' });
+		const fileInput = contentEl.createEl('input') as HTMLInputElement;
+		fileInput.type = 'file';
+		fileInput.accept = 'image/*';
+
+		contentEl.createEl('br');
+
+		// 3) A button to process the selected file
+		const processButton = contentEl.createEl('button', { text: 'Send to GPT-4o' });
+
+		// 4) A result area for showing the model’s response
+		const resultDiv = contentEl.createEl('div', { cls: 'pic2markdown-result' });
+
+		// On click, read user’s chosen file name + image, then process
+		processButton.addEventListener('click', async () => {
+			const userFileName = fileNameInput.value.trim();
+			if (!userFileName) {
+				new Notice('Please enter a valid file name.');
+				return;
+			}
+
+			if (!fileInput.files || fileInput.files.length === 0) {
+				new Notice('Please upload an image first!');
+				return;
+			}
+
+			try {
+				const file = fileInput.files[0];
+				const gptResult = await this.processImage(file);
+				resultDiv.setText(gptResult);
+
+				// Now create the new note, passing in both the GPT text and user’s requested file name
+				await this.createNewNoteWithContent(gptResult, userFileName);
+
+			} catch (error) {
+				console.error(error);
+				new Notice(error.message || 'An error occurred processing the image.');
+			}
+		});
 	}
 
 	onClose() {
-		const {contentEl} = this;
+		const { contentEl } = this;
 		contentEl.empty();
+	}
+
+	/**
+	 * Convert the image into GPT-4 with Vision’s response
+	 */
+	async processImage(file: File): Promise<string> {
+		if (!this.settings.openaiApiKey) {
+			throw new Error('OpenAI API key is not set. Please configure it in the plugin settings.');
+		}
+
+		// Create the OpenAI client
+		const openai = new OpenAI({
+			apiKey: this.settings.openaiApiKey,
+			dangerouslyAllowBrowser: true,
+		});
+
+		// Use FileReader to convert the image to base64 dataURL
+		const reader = new FileReader();
+
+		return new Promise((resolve, reject) => {
+			reader.onload = async (event) => {
+				if (event.target?.result) {
+					const imageData = event.target.result as string;
+
+					try {
+						// Make sure you have access to the "gpt-4o-mini" model
+						const response = await openai.chat.completions.create({
+							model: "gpt-4o-mini",
+							messages: [
+								{
+									role: "user",
+									content: [
+										{
+											type: "text",
+											text: "Please convert the text in this image to Markdown. Only output the raw markdown. Do not summarize its content. Handle nested lists with tabs not spaces."
+										},
+										{
+											type: "image_url",
+											image_url: {
+												url: imageData,
+												detail: "auto"
+											}
+										}
+									]
+								}
+							],
+							max_tokens: 1000
+						});
+
+						const output = response.choices[0]?.message?.content || 'No content extracted.';
+						const cleanedOutput = output.replace(/```/g, '');
+						resolve(cleanedOutput);
+					} catch (error) {
+						reject(error);
+					}
+				} else {
+					reject(new Error('File data could not be read.'));
+				}
+			};
+
+			reader.onerror = () => {
+				reject(new Error('Failed to read the image file.'));
+			};
+
+			reader.readAsDataURL(file);
+		});
+	}
+
+	/**
+	 * Create a new note in your Obsidian vault with the GPT output.
+	 * The user’s chosen file name is passed in directly from the input field.
+	 */
+	async createNewNoteWithContent(markdownContent: string, userFileName: string) {
+		const vault = this.app.vault;
+
+		// Append ".md" if missing
+		const finalFileName = userFileName.endsWith('.md')
+			? userFileName
+			: `${userFileName}.md`;
+
+		try {
+			// Create the file in the vault
+			const newFile = await vault.create(finalFileName, markdownContent);
+
+			// Open the newly created file in a new leaf/pane
+			const leaf = this.app.workspace.getLeaf(true);
+			await leaf.openFile(newFile);
+
+		} catch (err) {
+			console.error('Could not create the new note:', err);
+			throw err;
+		}
 	}
 }
 
-class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
+class Pic2MarkdownSettingTab extends PluginSettingTab {
+	plugin: Pic2Markdown;
 
-	constructor(app: App, plugin: MyPlugin) {
+	constructor(app: App, plugin: Pic2Markdown) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
 
 	display(): void {
-		const {containerEl} = this;
-
+		const { containerEl } = this;
 		containerEl.empty();
 
 		new Setting(containerEl)
-			.setName('Setting #1')
-			.setDesc('It\'s a secret')
+			.setName('OpenAI API Key')
+			.setDesc('Enter your OpenAI API Key (must have GPT-4o access).')
 			.addText(text => text
-				.setPlaceholder('Enter your secret')
+				.setPlaceholder('sk-...')
+				.setValue(this.plugin.settings.openaiApiKey)
+				.onChange(async (value) => {
+					this.plugin.settings.openaiApiKey = value;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('Some Other Setting')
+			.setDesc('Example text setting for demonstration.')
+			.addText(text => text
+				.setPlaceholder('Enter your setting value')
 				.setValue(this.plugin.settings.mySetting)
 				.onChange(async (value) => {
 					this.plugin.settings.mySetting = value;

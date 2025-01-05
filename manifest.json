@@ -1,11 +1,11 @@
 {
-	"id": "pic2markdown",
-	"name": "Pic2Markdown",
-	"version": "1.0.0",
-	"minAppVersion": "0.15.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
-	"isDesktopOnly": false
+    "id": "pic2markdown",
+    "name": "Pic2Markdown",
+    "version": "1.0.0",
+    "minAppVersion": "0.12.0",
+    "description": "Convert images to Markdown using GPT-4 Vision.",
+    "author": "Your Name",
+    "authorUrl": "https://yourwebsite.com",
+    "isDesktopOnly": false,
+	"styles": "styles.css"
 }

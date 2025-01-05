@@ -1,8 +1,147 @@
-/*
+/* Pic2Markdown Plugin Styles */
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+/* 1. Ribbon Icon Styling */
+.my-plugin-ribbon-class {
+    color: var(--text-normal);
+    transition: color 0.3s ease, transform 0.3s ease;
+}
 
-If your plugin does not need CSS, delete this file.
+.my-plugin-ribbon-class:hover {
+    color: var(--interactive-accent);
+    transform: scale(1.1);
+}
 
-*/
+/* 2. Modal Styling */
+.pic2markdown-modal {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    padding: 1.5em;
+    background-color: var(--background-secondary);
+    border-radius: 8px;
+    box-shadow: var(--modal-shadow);
+}
+
+.pic2markdown-modal h2 {
+    font-size: 1.75em;
+    color: var(--text-heading);
+    margin-bottom: 0.5em;
+    text-align: center;
+}
+
+.pic2markdown-modal label {
+    font-weight: 600;
+    color: var(--text-normal);
+    margin-bottom: 0.25em;
+}
+
+.pic2markdown-modal input[type="text"],
+.pic2markdown-modal input[type="file"] {
+    width: 100%;
+    padding: 0.6em 0.8em;
+    border: 1px solid var(--interactive-normal);
+    border-radius: 4px;
+    background-color: var(--background-modifier-overlay);
+    color: var(--text-normal);
+    font-size: 1em;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.pic2markdown-modal input[type="text"]:focus,
+.pic2markdown-modal input[type="file"]:focus {
+    border-color: var(--interactive-accent);
+    box-shadow: 0 0 0 2px var(--interactive-accent-opacity);
+    outline: none;
+}
+
+.pic2markdown-modal button {
+    align-self: flex-start;
+    padding: 0.6em 1.2em;
+    background-color: var(--interactive-accent);
+    border: none;
+    border-radius: 4px;
+    color: var(--text-on-accent);
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.pic2markdown-modal button:hover {
+    background-color: var(--interactive-accent-hover);
+    transform: translateY(-2px);
+}
+
+.pic2markdown-modal button:active {
+    transform: translateY(0);
+}
+
+.pic2markdown-result {
+    margin-top: 1em;
+    padding: 1em;
+    background-color: var(--background-modifier-hover);
+    border-left: 4px solid var(--interactive-accent);
+    border-radius: 4px;
+    max-height: 250px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    color: var(--text-normal);
+    font-family: var(--font-family-monospace);
+}
+
+/* 3. Settings Tab Styling */
+.setting-item {
+    margin-bottom: 1.5em;
+}
+
+.setting-item .setting-title {
+    font-size: 1.1em;
+    color: var(--text-heading);
+    margin-bottom: 0.3em;
+}
+
+.setting-item .setting-description {
+    font-size: 0.9em;
+    color: var(--text-muted);
+    margin-bottom: 0.5em;
+}
+
+.setting-item input[type="text"] {
+    width: 100%;
+    padding: 0.6em 0.8em;
+    border: 1px solid var(--interactive-normal);
+    border-radius: 4px;
+    background-color: var(--background-modifier-overlay);
+    color: var(--text-normal);
+    font-size: 1em;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.setting-item input[type="text"]:focus {
+    border-color: var(--interactive-accent);
+    box-shadow: 0 0 0 2px var(--interactive-accent-opacity);
+    outline: none;
+}
+
+/* 4. Spinner Styling */
+.pic2markdown-spinner {
+    border: 4px solid var(--background-modifier-border);
+    border-top: 4px solid var(--interactive-accent);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    animation: spin 1s linear infinite;
+    margin-left: 10px;
+    display: none; /* Hidden by default */
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.pic2markdown-modal button:disabled {
+    background-color: var(--background-modifier-hover);
+    color: var(--text-muted);
+    cursor: not-allowed;
+    opacity: 0.7;
+}

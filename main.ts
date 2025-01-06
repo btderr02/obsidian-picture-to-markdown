@@ -250,23 +250,18 @@ class Pic2MarkdownSettingTab extends PluginSettingTab {
         new Setting(containerEl)
             .setName('OpenAI API Key')
             .setDesc('Enter your OpenAI API Key (must have GPT-4o access).')
-            .addText(text => text
-                .setPlaceholder('sk-...')
-                .setValue(this.plugin.settings.openaiApiKey)
-                .onChange(async (value) => {
-                    this.plugin.settings.openaiApiKey = value;
-                    await this.plugin.saveSettings();
-                }));
+            .addText(text => {
+                text
+                    .setPlaceholder('sk-...')
+                    .setValue(this.plugin.settings.openaiApiKey)
+                    .onChange(async (value) => {
+                        this.plugin.settings.openaiApiKey = value;
+                        await this.plugin.saveSettings();
+                    });
+                // Set the input type to 'password' to hide characters
+                text.inputEl.setAttribute('type', 'password');
+            });
 
-        new Setting(containerEl)
-            .setName('Some Other Setting')
-            .setDesc('Example text setting for demonstration.')
-            .addText(text => text
-                .setPlaceholder('Enter your setting value')
-                .setValue(this.plugin.settings.mySetting)
-                .onChange(async (value) => {
-                    this.plugin.settings.mySetting = value;
-                    await this.plugin.saveSettings();
-                }));
     }
 }
+

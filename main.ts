@@ -6,7 +6,8 @@ import {
     Notice,
     Plugin,
     PluginSettingTab,
-    Setting
+    Setting,
+    TextComponent
 } from 'obsidian';
 
 // Import the new default export from 'openai' (v4+):
@@ -92,6 +93,7 @@ class Pic2MarkdownModal extends Modal {
         
         // Create and append the spinner element
         this.spinnerEl = contentEl.createEl('div', { cls: 'pic2markdown-spinner' });
+        this.spinnerEl.style.display = 'none'; // Hide spinner by default
 
         // 4) A result area for showing the model’s response
         const resultDiv = contentEl.createEl('div', { cls: 'pic2markdown-result' });
@@ -127,7 +129,7 @@ class Pic2MarkdownModal extends Modal {
 
             } catch (error) {
                 console.error(error);
-                new Notice(error.message || 'An error occurred processing the image.');
+                new Notice((error as Error).message || 'An error occurred processing the image.');
             } finally {
                 // Hide the spinner and enable the button
                 this.spinnerEl.style.display = 'none';
@@ -189,7 +191,7 @@ class Pic2MarkdownModal extends Modal {
                         });
 
                         const output = response.choices[0]?.message?.content || 'No content extracted.';
-                        const cleanedOutput = output.replace(/```/g, '');
+                        const cleanedOutput = output.replace(/```/g, '').trim();
                         resolve(cleanedOutput);
                     } catch (error) {
                         reject(error);
@@ -213,27 +215,29 @@ class Pic2MarkdownModal extends Modal {
      */
     async createNewNoteWithContent(markdownContent: string, userFileName: string) {
         const vault = this.app.vault;
-
+    
+        // Trim the markdown content to remove any leading/trailing whitespace
+        const trimmedContent = markdownContent.trimStart(); // Remove only leading whitespace if you prefer
+    
         // Append ".md" if missing
         const finalFileName = userFileName.endsWith('.md')
             ? userFileName
             : `${userFileName}.md`;
-
+    
         try {
             // Create the file in the vault
-            const newFile = await vault.create(finalFileName, markdownContent);
-
+            const newFile = await vault.create(finalFileName, trimmedContent);
+    
             // Open the newly created file in a new leaf/pane
             const leaf = this.app.workspace.getLeaf(true);
             await leaf.openFile(newFile);
-
+    
         } catch (err) {
             console.error('Could not create the new note:', err);
             throw err;
         }
     }
 }
-
 
 class Pic2MarkdownSettingTab extends PluginSettingTab {
     plugin: Pic2Markdown;
@@ -247,21 +251,57 @@ class Pic2MarkdownSettingTab extends PluginSettingTab {
         const { containerEl } = this;
         containerEl.empty();
 
-        new Setting(containerEl)
+        // === OpenAI API Key Setting ===
+        const apiKeySetting = new Setting(containerEl)
             .setName('OpenAI API Key')
-            .setDesc('Enter your OpenAI API Key (must have GPT-4o access).')
-            .addText(text => {
-                text
-                    .setPlaceholder('sk-...')
-                    .setValue(this.plugin.settings.openaiApiKey)
-                    .onChange(async (value) => {
-                        this.plugin.settings.openaiApiKey = value;
-                        await this.plugin.saveSettings();
-                    });
-                // Set the input type to 'password' to hide characters
-                text.inputEl.setAttribute('type', 'password');
-            });
+            .setDesc('Enter your OpenAI API Key (must have GPT-4o access).');
 
+        // Initialize a variable to hold the TextComponent
+        let apiKeyTextComponent: TextComponent;
+
+        // Add the TextComponent using addText and capture the reference
+        apiKeySetting.addText((text: TextComponent) => {
+            apiKeyTextComponent = text;
+            text
+                .setPlaceholder('sk-...')
+                .setValue(this.plugin.settings.openaiApiKey)
+                .onChange(async (value: string) => {
+                    this.plugin.settings.openaiApiKey = value;
+                    await this.plugin.saveSettings();
+                });
+
+            // Initially set the input type to 'password' to hide characters
+            text.inputEl.type = 'password';
+        });
+
+        // Create the "Show" button
+        const toggleButton = apiKeySetting.controlEl.createEl('button', { text: 'Show' });
+        toggleButton.style.marginLeft = '10px';
+        toggleButton.style.cursor = 'pointer'; // Change cursor to pointer for better UX
+
+        // Event listener to toggle password visibility
+        toggleButton.addEventListener('click', () => {
+            if (apiKeyTextComponent.inputEl.type === 'password') {
+                apiKeyTextComponent.inputEl.type = 'text';
+                toggleButton.textContent = 'Hide';
+            } else {
+                apiKeyTextComponent.inputEl.type = 'password';
+                toggleButton.textContent = 'Show';
+            }
+        });
+
+        // === Other Settings (Example) ===
+        new Setting(containerEl)
+            .setName('Some Other Setting')
+            .setDesc('Example text setting for demonstration.')
+            .addText((text: TextComponent) =>
+                text
+                    .setPlaceholder('Enter your setting value')
+                    .setValue(this.plugin.settings.mySetting)
+                    .onChange(async (value: string) => {
+                        this.plugin.settings.mySetting = value;
+                        await this.plugin.saveSettings();
+                    })
+            );
     }
 }
-

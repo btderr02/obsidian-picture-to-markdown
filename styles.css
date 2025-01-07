@@ -1,17 +1,6 @@
 /* Pic2Markdown Plugin Styles */
 
-/* 1. Ribbon Icon Styling */
-.my-plugin-ribbon-class {
-    color: var(--text-normal);
-    transition: color 0.3s ease, transform 0.3s ease;
-}
-
-.my-plugin-ribbon-class:hover {
-    color: var(--interactive-accent);
-    transform: scale(1.1);
-}
-
-/* 2. Modal Styling */
+/* 1. Modal Styling */
 .pic2markdown-modal {
     display: flex;
     flex-direction: column;
@@ -88,7 +77,7 @@
     font-family: var(--font-family-monospace);
 }
 
-/* 3. Settings Tab Styling */
+/* 2. Settings Tab Styling */
 .setting-item {
     margin-bottom: 1.5em;
 }
@@ -122,7 +111,7 @@
     outline: none;
 }
 
-/* 4. Spinner Styling */
+/* 3. Spinner Styling */
 .pic2markdown-spinner {
     border: 4px solid var(--background-modifier-border);
     border-top: 4px solid var(--interactive-accent);

@@ -34,8 +34,8 @@ export default class Pic2Markdown extends Plugin {
 
         // Create an icon in the left ribbon to open the modal
         const ribbonIconEl = this.addRibbonIcon(
-            'dice', 
-            'Pic2Markdown Plugin', 
+            'aperture', 
+            'Upload Pic2Markdown Image(s)', 
             (evt: MouseEvent) => {
                 new Pic2MarkdownModal(this.app, this.settings).open();
             }
@@ -71,7 +71,7 @@ class Pic2MarkdownModal extends Modal {
     onOpen() {
         const { contentEl } = this;
         contentEl.addClass('pic2markdown-modal');
-        contentEl.createEl('h2', { text: 'Upload an Image for GPT-4 with Vision' });
+        contentEl.createEl('h2', { text: 'Upload your Image(s)' });
 
         // 1) A text field for the user to enter the new file name
         contentEl.createEl('label', { text: 'Name of the new file:' });
@@ -95,9 +95,6 @@ class Pic2MarkdownModal extends Modal {
         this.spinnerEl = contentEl.createEl('div', { cls: 'pic2markdown-spinner' });
         this.spinnerEl.style.display = 'none'; // Hide spinner by default
 
-        // 4) A result area for showing the model’s response
-        const resultDiv = contentEl.createEl('div', { cls: 'pic2markdown-result' });
-
         // On click, read user’s chosen file name + image, then process
         processButton.addEventListener('click', async () => {
             const userFileName = fileNameInput.value.trim();
@@ -118,7 +115,6 @@ class Pic2MarkdownModal extends Modal {
             try {
                 const file = fileInput.files[0];
                 const gptResult = await this.processImage(file);
-                resultDiv.setText(gptResult);
 
                 // Now create the new note, passing in both the GPT text and user’s requested file name
                 await this.createNewNoteWithContent(gptResult, userFileName);

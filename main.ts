@@ -316,7 +316,7 @@ class Pic2MarkdownSettingTab extends PluginSettingTab {
         containerEl.empty();
 
         // === OpenAI API Key Setting ===
-        new Setting(containerEl)
+        const setting = new Setting(containerEl)
             .setName('OpenAI API Key')
             .setDesc('Enter your OpenAI API Key (must have GPT-4o access).')
             .addText((text) => {
@@ -327,23 +327,31 @@ class Pic2MarkdownSettingTab extends PluginSettingTab {
                         this.plugin.settings.openaiApiKey = value;
                         await this.plugin.saveSettings();
                     });
+
                 // Hide the key by default
                 text.inputEl.type = 'password';
-            })
-            .controlEl.createEl('button', { text: 'Show' }, (btn) => {
-                btn.style.marginLeft = '10px';
-                btn.style.cursor = 'pointer';
-                btn.addEventListener('click', () => {
-                    const inputEl = (btn.previousSibling as HTMLElement)
-                        .querySelector<HTMLInputElement>('input');
-                    if (inputEl?.type === 'password') {
-                        inputEl.type = 'text';
-                        btn.textContent = 'Hide';
-                    } else {
-                        inputEl.type = 'password';
-                        btn.textContent = 'Show';
-                    }
-                });
             });
+
+        // Now add the "Show/Hide" button to the setting's controlEl:
+        setting.controlEl.createEl('button', { text: 'Show' }, (btnEl: HTMLButtonElement) => {
+            btnEl.style.marginLeft = '10px';
+            btnEl.style.cursor = 'pointer';
+
+            btnEl.addEventListener('click', () => {
+                // Access the text input from the setting
+                const input = setting.settingEl.querySelector('input');
+                if (input instanceof HTMLInputElement) {
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        btnEl.textContent = 'Hide';
+                    } else {
+                        input.type = 'password';
+                        btnEl.textContent = 'Show';
+                    }
+                }
+            });
+        });
+
+
     }
 }

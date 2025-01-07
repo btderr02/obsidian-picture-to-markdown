@@ -80,11 +80,10 @@ class Pic2MarkdownModal extends Modal {
         const fileNameContainer = contentEl.createDiv();
         fileNameContainer.createEl('label', { text: 'Name of the new file:' });
         const fileNameInput = fileNameContainer.createEl('input', { type: 'text' });
-        fileNameInput.value = 'Untitled'; // Provide a default
+        fileNameInput.value = 'Untitled';
 
         fileNameContainer.createEl('br');
 
-        // Hide/show the file name input depending on mode
         function updateFileNameVisibility() {
             if (modeSelect.value === 'Bulk') {
                 fileNameContainer.style.display = 'none';
@@ -92,10 +91,7 @@ class Pic2MarkdownModal extends Modal {
                 fileNameContainer.style.display = '';
             }
         }
-        // Set initial visibility
         updateFileNameVisibility();
-
-        // Listen for changes to the mode selection
         modeSelect.addEventListener('change', () => {
             updateFileNameVisibility();
         });
@@ -109,16 +105,21 @@ class Pic2MarkdownModal extends Modal {
 
         contentEl.createEl('br');
 
-        // === A button to process the selected file(s) ===
-        const processButton = contentEl.createEl('button', { text: 'Send to GPT-4o' });
+        // --- Create a container that holds both button and spinner side by side ---
+        const processContainer = contentEl.createDiv({ cls: 'pic2markdown-process-container' });
+        processContainer.style.display = 'inline-flex';
+        processContainer.style.alignItems = 'center';
+        processContainer.style.gap = '10px'; // just for spacing
 
-        // === Create and append the spinner element ===
-        this.spinnerEl = contentEl.createEl('div', { cls: 'pic2markdown-spinner' });
+        // === A button to process the selected file(s) ===
+        const processButton = processContainer.createEl('button', { text: 'Send to GPT-4o' });
+
+        // === Create and append the spinner element to the right of the button ===
+        this.spinnerEl = processContainer.createEl('div', { cls: 'pic2markdown-spinner' });
         this.spinnerEl.style.display = 'none'; // Hide spinner by default
 
         // On click, read user’s chosen file name + image(s), then process
         processButton.addEventListener('click', async () => {
-            // Validate the file input
             if (!fileInput.files || fileInput.files.length === 0) {
                 new Notice('Please upload at least one image!');
                 return;
@@ -134,12 +135,9 @@ class Pic2MarkdownModal extends Modal {
                 } else if (chosenMode === 'Multi Image') {
                     await this.handleMultiImage(fileInput, fileNameInput.value.trim());
                 } else {
-                    // Bulk mode
                     await this.handleBulk(fileInput);
                 }
-
                 this.close();
-
             } catch (error) {
                 console.error(error);
                 new Notice(

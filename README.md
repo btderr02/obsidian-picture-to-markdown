@@ -1,7 +1,7 @@
 # Obsidian Picture to Markdown 
 
 ## Overview
-Picture to Markdown for Obsidian converts images of handwritten notes into Markdown files in Obsidian. It uses GPT-4o-mini's vision capabilities via an OpenAI API key.
+Picture to Markdown for Obsidian converts images of text (handwritten or otherwise) into Markdown files for your Obsidian vault. It uses GPT-4o-mini's vision capabilities via an OpenAI API key.
 
 ## Key features
 - **Modes**: Single Image, Multi Image (combined note), Bulk (separate notes).

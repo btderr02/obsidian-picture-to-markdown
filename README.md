@@ -1,7 +1,7 @@
-# Picture to Markdown Obsidian Plugin Documentation
+# Obsidian Picture to Markdown 
 
 ## Overview
-Pic2Markdown converts images of handwritten notes into Markdown files in Obsidian. It uses GPT-4o-mini's vision capabilities via an OpenAI API key.
+Picture to Markdown for Obsidian converts images of handwritten notes into Markdown files in Obsidian. It uses GPT-4o-mini's vision capabilities via an OpenAI API key.
 
 ## Key features
 - **Modes**: Single Image, Multi Image (combined note), Bulk (separate notes).
@@ -23,6 +23,6 @@ Typical conversion uses ~100,000 input tokens and ~500 output tokens, costing ~1
 
 ## Model choice 
 
-While GPT-4o and GPT-4o-mini are not the only available models with vision capabilities, they are by far the best. Other cloud models produced worse output with negligable differences in cost with 4o-mini. I saw no discernable difference between 4o and 4o-mini in their output, so I chose to stick to only 4o-mini. Further, local LLMs are simply not sufficient in their current form to preform this task. This may change later down the line. If there is sufficient interest to add functionality for other models, I will revist sticking to only 4o-mini. 
+While GPT-4o and GPT-4o-mini are not the only available models with vision capabilities, they are by far the best. Other cloud models produced worse output with negligable differences in cost with 4o-mini. I saw no discernable difference between 4o and 4o-mini in their output, so I chose to stick to only 4o-mini. Further, local LLMs are simply not sufficient in their current form to preform this task. This may change later down the line. If there is enough interest in adding functionality for other models, I will revist sticking to only 4o-mini. 
 
-Traditional OCR approaches are also not great. This is especially true for handwriting, the use case that I had in mind when starting this project. Even if they worked as intended, OCR models would not be able to format notes into Markdown.
+Traditional OCR approaches are also not sufficient to convert text to Markdown. This is especially true for handwriting, the use case that I had in mind when starting this project. Even if they worked as intended, OCR models would not be able to format notes into Markdown.

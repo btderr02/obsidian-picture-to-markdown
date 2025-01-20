@@ -28,7 +28,7 @@ export default class Pic2Markdown extends Plugin {
 
         const ribbonIconEl = this.addRibbonIcon(
             'aperture',
-            'Upload Pic2Markdown Image(s)',
+            'Convert Image(s) to Markdown',
             () => {
                 new Pic2MarkdownModal(this.app, this.settings).open();
             }
@@ -39,7 +39,7 @@ export default class Pic2Markdown extends Plugin {
     }
 
     onunload() {
-        console.log('unloading Pic2Markdown plugin');
+        console.log('unloading Picture to Markdown plugin');
     }
 
     async loadSettings() {
@@ -323,6 +323,9 @@ class Pic2MarkdownSettingTab extends PluginSettingTab {
         const { containerEl } = this;
         containerEl.empty();
 
+        // === Add Header ===
+        containerEl.createEl('h1', { text: 'Picture to Markdown' });
+        
         // === OpenAI API Key Setting ===
         const setting = new Setting(containerEl)
             .setName('OpenAI API Key')

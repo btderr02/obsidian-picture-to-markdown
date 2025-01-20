@@ -134,3 +134,47 @@
     cursor: not-allowed;
     opacity: 0.7;
 }
+
+/* Style the <select> element in the modal */
+.pic2markdown-modal select {
+    box-sizing: border-box;           /* So padding is counted inside total width/height */
+    width: 100%;                      /* Match text fields */
+    padding: 0em 0.8em 0em 0.8em;             /* Balanced padding */
+    font-size: 1rem;                  /* Use a relative font size */
+    line-height: 1.4;                 /* Ensures enough vertical space for text */
+    border: 1px solid var(--interactive-normal);
+    border-radius: 4px;
+    background-color: var(--background-modifier-overlay);
+    color: var(--text-normal);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+  
+    /* Remove native OS arrows.
+       If you don’t want a custom arrow, just stop here—no background-image. */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+  
+  .pic2markdown-modal select:focus {
+    border-color: var(--interactive-accent);
+    box-shadow: 0 0 0 2px var(--interactive-accent-opacity);
+    outline: none;
+  }
+  
+
+/* If you want to style <option> elements, you can, but not all 
+   browsers will allow full customization: */
+.pic2markdown-modal select option {
+    background-color: var(--background-primary);
+    color: var(--text-normal);
+}
+
+.file-name-container,
+.file-select-container,
+.mode-select-container {
+  display: flex;
+  flex-direction: column;  /* label above input */
+  gap: 0.25rem;            /* space between label & input */
+  margin-bottom: 1rem;     /* space below each container */
+}

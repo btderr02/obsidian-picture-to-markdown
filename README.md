@@ -15,6 +15,7 @@ Pic2Markdown converts images of handwritten notes into Markdown files in Obsidia
 
 ## Settings
 - Enter your OpenAI API key in the plugin settings.
+    - **Your API key will be stored locally in raw text format inside the plugin.**
 - Toggle key visibility with **Show/Hide**.
 
 ## Cost

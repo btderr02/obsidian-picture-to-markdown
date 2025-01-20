@@ -66,24 +66,32 @@ class Pic2MarkdownModal extends Modal {
         contentEl.createEl('h2', { text: 'Upload your Image(s)' });
 
         // === A select to choose the mode: Single, Multi, or Bulk ===
-        contentEl.createEl('label', { text: 'Choose mode:' });
-        const modeSelect = contentEl.createEl('select');
+        // Create a container <div> with a class
+        const container = contentEl.createEl('div', { cls: 'mode-select-container' });
+
+        // Create the label inside the container
+        container.createEl('label', { text: 'Choose mode:' });
+
+        // Create the <select> inside the same container
+        const modeSelect = container.createEl('select');
+
+        // Then add options to the select
         ['Single Image', 'Multi Image', 'Bulk'].forEach((mode) => {
-            const option = modeSelect.createEl('option');
-            option.value = mode;
-            option.text = mode;
+        const option = modeSelect.createEl('option');
+        option.value = mode;
+        option.text = mode;
         });
 
-        contentEl.createEl('br');
+        // === contentEl.createEl('br');
 
         // === Container for the "Name of the new file" label & input ===
-        const fileNameContainer = contentEl.createDiv();
+        const fileNameContainer = contentEl.createDiv({ cls: 'file-name-container' });
         fileNameContainer.createEl('label', { text: 'Name of the new file:' });
+
         const fileNameInput = fileNameContainer.createEl('input', { type: 'text' });
         fileNameInput.value = 'Untitled';
 
-        fileNameContainer.createEl('br');
-
+        // Hide or show container based on the current mode
         function updateFileNameVisibility() {
             if (modeSelect.value === 'Bulk') {
                 fileNameContainer.style.display = 'none';
@@ -92,18 +100,20 @@ class Pic2MarkdownModal extends Modal {
             }
         }
         updateFileNameVisibility();
-        modeSelect.addEventListener('change', () => {
-            updateFileNameVisibility();
-        });
+        modeSelect.addEventListener('change', updateFileNameVisibility);
 
-        // === A file input to let the user pick images (allow multiple) ===
-        contentEl.createEl('label', { text: 'Select image(s):' });
-        const fileInput = contentEl.createEl('input') as HTMLInputElement;
+
+        // === Container for the "Select image(s)" label & file input ===
+        const fileSelectContainer = contentEl.createDiv({ cls: 'file-select-container' });
+        fileSelectContainer.createEl('label', { text: 'Select image(s):' });
+
+        const fileInput = fileSelectContainer.createEl('input') as HTMLInputElement;
         fileInput.type = 'file';
         fileInput.accept = 'image/*';
         fileInput.multiple = true;
 
-        contentEl.createEl('br');
+
+        // === contentEl.createEl('br');
 
         // --- Create a container that holds both button and spinner side by side ---
         const processContainer = contentEl.createDiv({ cls: 'pic2markdown-process-container' });

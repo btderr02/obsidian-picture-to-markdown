@@ -107,11 +107,38 @@ class Pic2MarkdownModal extends Modal {
         const fileSelectContainer = contentEl.createDiv({ cls: 'file-select-container' });
         fileSelectContainer.createEl('label', { text: 'Select image(s):' });
 
-        const fileInput = fileSelectContainer.createEl('input') as HTMLInputElement;
+        // Create wrapper div for custom file input
+        const customFileInput = fileSelectContainer.createDiv({ cls: 'custom-file-input' });
+
+        // Create hidden actual file input
+        const fileInput = customFileInput.createEl('input') as HTMLInputElement;
         fileInput.type = 'file';
         fileInput.accept = 'image/*';
         fileInput.multiple = true;
+        fileInput.style.display = 'none';  // Hide the default input
+        
+        // Create visible custom button
+        const customButton = customFileInput.createEl('button', {
+            text: 'Choose Image(s)',
+            cls: 'styled-file-button'
+        });
 
+        // Create element to display selected files
+        const fileNamesDisplay = customFileInput.createEl('div', { cls: 'file-names' });
+
+        // Link custom button to file input
+        customButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            fileInput.click();
+        });
+
+        // Update displayed file names when files are selected
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files) {
+                const names = Array.from(fileInput.files).map(f => f.name);
+                fileNamesDisplay.textContent = names.join(', ');
+            }
+        });
 
         // === contentEl.createEl('br');
 

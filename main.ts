@@ -4,8 +4,7 @@ import {
     Notice,
     Plugin,
     PluginSettingTab,
-    Setting,
-    TextComponent
+    Setting
 } from 'obsidian';
 import OpenAI from 'openai';
 
@@ -33,7 +32,6 @@ export default class Pic2Markdown extends Plugin {
                 new Pic2MarkdownModal(this.app, this.settings).open();
             }
         );
-        ribbonIconEl.addClass('my-plugin-ribbon-class');
 
         this.addSettingTab(new Pic2MarkdownSettingTab(this.app, this));
     }
@@ -66,25 +64,17 @@ class Pic2MarkdownModal extends Modal {
         contentEl.createEl('h2', { text: 'Upload your Image(s)' });
 
         // === A select to choose the mode: Single, Multi, or Bulk ===
-        // Create a container <div> with a class
         const container = contentEl.createEl('div', { cls: 'mode-select-container' });
-
-        // Create the label inside the container
         container.createEl('label', { text: 'Choose mode:' });
 
-        // Create the <select> inside the same container
         const modeSelect = container.createEl('select');
-
-        // Then add options to the select
         ['Single Image', 'Multi Image', 'Bulk'].forEach((mode) => {
-        const option = modeSelect.createEl('option');
-        option.value = mode;
-        option.text = mode;
+            const option = modeSelect.createEl('option');
+            option.value = mode;
+            option.text = mode;
         });
 
-        // === contentEl.createEl('br');
-
-        // === Container for the "Name of the new file" label & input ===
+        // === Container for "Name of the new file" label & input ===
         const fileNameContainer = contentEl.createDiv({ cls: 'file-name-container' });
         fileNameContainer.createEl('label', { text: 'Name of the new file:' });
 
@@ -92,16 +82,15 @@ class Pic2MarkdownModal extends Modal {
         fileNameInput.value = 'Untitled';
 
         // Hide or show container based on the current mode
-        function updateFileNameVisibility() {
+        const updateFileNameVisibility = () => {
             if (modeSelect.value === 'Bulk') {
-                fileNameContainer.style.display = 'none';
+                fileNameContainer.classList.add('hidden');
             } else {
-                fileNameContainer.style.display = '';
+                fileNameContainer.classList.remove('hidden');
             }
-        }
+        };
         updateFileNameVisibility();
         modeSelect.addEventListener('change', updateFileNameVisibility);
-
 
         // === Container for the "Select image(s)" label & file input ===
         const fileSelectContainer = contentEl.createDiv({ cls: 'file-select-container' });
@@ -111,12 +100,13 @@ class Pic2MarkdownModal extends Modal {
         const customFileInput = fileSelectContainer.createDiv({ cls: 'custom-file-input' });
 
         // Create hidden actual file input
-        const fileInput = customFileInput.createEl('input') as HTMLInputElement;
+        const fileInput = customFileInput.createEl('input', {
+            cls: 'pic2markdown-file-input'
+        }) as HTMLInputElement;
         fileInput.type = 'file';
         fileInput.accept = 'image/*';
         fileInput.multiple = true;
-        fileInput.style.display = 'none';  // Hide the default input
-        
+
         // Create visible custom button
         const customButton = customFileInput.createEl('button', {
             text: 'Choose Image(s)',
@@ -140,20 +130,16 @@ class Pic2MarkdownModal extends Modal {
             }
         });
 
-        // === contentEl.createEl('br');
-
         // --- Create a container that holds both button and spinner side by side ---
         const processContainer = contentEl.createDiv({ cls: 'pic2markdown-process-container' });
-        processContainer.style.display = 'inline-flex';
-        processContainer.style.alignItems = 'center';
-        processContainer.style.gap = '10px'; // just for spacing
 
         // === A button to process the selected file(s) ===
         const processButton = processContainer.createEl('button', { text: 'Send to GPT-4o' });
 
-        // === Create and append the spinner element to the right of the button ===
-        this.spinnerEl = processContainer.createEl('div', { cls: 'pic2markdown-spinner' });
-        this.spinnerEl.style.display = 'none'; // Hide spinner by default
+        // === Create and append the spinner element to the container ===
+        this.spinnerEl = processContainer.createEl('div', {
+            cls: 'pic2markdown-spinner pic2markdown-spinner-hidden'
+        });
 
         // On click, read user’s chosen file name + image(s), then process
         processButton.addEventListener('click', async () => {
@@ -162,7 +148,9 @@ class Pic2MarkdownModal extends Modal {
                 return;
             }
 
-            this.spinnerEl.style.display = 'inline-block';
+            // Show spinner
+            this.spinnerEl.classList.remove('pic2markdown-spinner-hidden');
+            this.spinnerEl.classList.add('pic2markdown-spinner-inline');
             processButton.disabled = true;
 
             try {
@@ -181,7 +169,9 @@ class Pic2MarkdownModal extends Modal {
                     (error as Error).message || 'An error occurred processing the images.'
                 );
             } finally {
-                this.spinnerEl.style.display = 'none';
+                // Hide spinner
+                this.spinnerEl.classList.remove('pic2markdown-spinner-inline');
+                this.spinnerEl.classList.add('pic2markdown-spinner-hidden');
                 processButton.disabled = false;
             }
         });
@@ -211,7 +201,7 @@ class Pic2MarkdownModal extends Modal {
 
     /**
      * MULTI IMAGE:
-     * Processes all selected images and concatenates all GPT outputs
+     * Processes all selected images and concatenates GPT outputs
      * into one single note (named fileName).
      */
     async handleMultiImage(fileInput: HTMLInputElement, fileName: string) {
@@ -366,15 +356,12 @@ class Pic2MarkdownSettingTab extends PluginSettingTab {
                         await this.plugin.saveSettings();
                     });
 
-                // Hide the key by default
+                // Hide the key by default (masking)
                 text.inputEl.type = 'password';
             });
 
-        // Now add the "Show/Hide" button to the setting's controlEl:
-        setting.controlEl.createEl('button', { text: 'Show' }, (btnEl: HTMLButtonElement) => {
-            btnEl.style.marginLeft = '10px';
-            btnEl.style.cursor = 'pointer';
-
+        // Now add the "Show/Hide" button to toggle the password field
+        setting.controlEl.createEl('button', { text: 'Show', cls: 'show-hide-btn' }, (btnEl: HTMLButtonElement) => {
             btnEl.addEventListener('click', () => {
                 // Access the text input from the setting
                 const input = setting.settingEl.querySelector('input');
@@ -389,7 +376,5 @@ class Pic2MarkdownSettingTab extends PluginSettingTab {
                 }
             });
         });
-
-
     }
 }

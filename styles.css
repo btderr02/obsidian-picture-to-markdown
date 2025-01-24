@@ -178,3 +178,39 @@
   gap: 0.25rem;            /* space between label & input */
   margin-bottom: 1rem;     /* space below each container */
 }
+
+.hidden {
+    display: none !important;
+}
+
+.pic2markdown-process-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Spinner states */
+.pic2markdown-spinner-hidden {
+    display: none;
+}
+.pic2markdown-spinner-inline {
+    display: inline-block;  
+}
+
+/* The custom file input is hidden by default */
+.pic2markdown-file-input {
+    display: none;
+}
+
+/* Show/Hide button for the API key */
+.show-hide-btn {
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+/* Optional: style the custom button for file selection */
+.styled-file-button {
+    /* Add your custom styling here if desired */
+    padding: 4px 8px;
+    cursor: pointer;
+}

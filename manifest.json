@@ -1,7 +1,7 @@
 {
     "id": "picture-to-markdown",
     "name": "Picture To Markdown",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "minAppVersion": "0.12.0",
     "description": "Convert images to Markdown using GPT-4o-mini Vision.",
     "author": "Brandon Derr",
